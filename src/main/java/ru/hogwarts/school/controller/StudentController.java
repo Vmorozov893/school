@@ -5,6 +5,11 @@ import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("student")
 public class StudentController {
@@ -44,6 +49,15 @@ public class StudentController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(deletedStudent);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Student>> StudentsByAge(@RequestParam(required = false) int age){
+        List<Student> students = studentService.filterForAge(age);
+        if(students == null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(students);
     }
 
 }
