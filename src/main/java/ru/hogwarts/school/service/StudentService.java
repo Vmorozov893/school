@@ -44,4 +44,8 @@ public class StudentService {
         return studentRepository.findByAgeBetween(min,max);
     }
 
+    public Faculty facultyByStudent(Long id){
+        return studentRepository.findById(id).orElseThrow(IllegalArgumentException::new).getFaculty();
+    }
+
 }

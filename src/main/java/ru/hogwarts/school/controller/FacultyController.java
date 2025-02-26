@@ -64,4 +64,9 @@ public class FacultyController {
         return ResponseEntity.ok(faculties);
     }
 
+    @GetMapping("studentsByFaculty")
+    public List<Student> studentsByFaculty(Long id){
+        return facultyService.studentsByFaculty(id);
+    }
+
 }
