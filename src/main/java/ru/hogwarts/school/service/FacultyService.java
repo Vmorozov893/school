@@ -2,45 +2,50 @@ package ru.hogwarts.school.service;
 
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.repository.FacultyRepository;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class FacultyService {
 
-    private Long count = 0L;
+    private final FacultyRepository facultyRepository;
 
-    private final HashMap<Long, Faculty> facultyHashMap = new HashMap<>();
-
-
+    public FacultyService(FacultyRepository facultyRepository) {
+        this.facultyRepository = facultyRepository;
+    }
 
     public Faculty createFaculty(Faculty faculty){
-        facultyHashMap.put(++count,faculty);
-        faculty.setId(count);
-        return faculty;
+        return facultyRepository.save(faculty);
     }
 
     public Faculty getFacultyById(Long id) {
-        return facultyHashMap.get(id);
+        return facultyRepository.findById(id).orElse(null);
     }
 
     public Faculty editFaculty(Long id, Faculty faculty) {
-        if(!facultyHashMap.containsKey(id)){
-            return null;
-        }
-        faculty.setId(id);
-        facultyHashMap.put(id, faculty);
-        return faculty;
+        Faculty faculty1 = facultyRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+        faculty1.setName(faculty.getName());
+        faculty1.setColor(faculty.getColor());
+        return facultyRepository.save(faculty1);
     }
 
-    public Faculty deleteFaculty(Long id) {
-        return facultyHashMap.remove(id);
+    public void deleteFaculty(Long id) {
+        facultyRepository.deleteById(id);
     }
 
     public List<Faculty> filterForColor(String color){
-        return facultyHashMap.values().stream().filter(e->e.getColor().equals(color)).collect(Collectors.toList());
+        return facultyRepository.findAll().stream().filter(e->e.getColor().equals(color)).collect(Collectors.toList());
     }
+    public List<Faculty> findByNameIgnoreCaseOrColorIgnoreCase(String name,String color){
+        return facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color);
+    }
+
+    public List<Student> studentsByFaculty (Long id){
+        return facultyRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStudents();
+    }
+
 
 }

@@ -41,12 +41,9 @@ public class FacultyController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Faculty> deleteFaculty(@PathVariable Long id){
-        Faculty deletedFaculty = facultyService.deleteFaculty(id);
-        if(deletedFaculty == null){
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(deletedFaculty);
+    public ResponseEntity<String> deleteFaculty(@PathVariable Long id){
+        facultyService.deleteFaculty(id);
+        return ResponseEntity.ok("OK");
     }
 
     @GetMapping
@@ -56,6 +53,20 @@ public class FacultyController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(faculties);
+    }
+
+    @GetMapping("findByNameIgnoreCaseOrColorIgnoreCase")
+    public ResponseEntity<List<Faculty>> findByNameIgnoreCaseOrColorIgnoreCase(String string){
+        List<Faculty> faculties = facultyService.findByNameIgnoreCaseOrColorIgnoreCase(string,string);
+        if(faculties == null){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(faculties);
+    }
+
+    @GetMapping("studentsByFaculty")
+    public List<Student> studentsByFaculty(Long id){
+        return facultyService.studentsByFaculty(id);
     }
 
 }

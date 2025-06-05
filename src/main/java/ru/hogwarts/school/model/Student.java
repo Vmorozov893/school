@@ -1,13 +1,23 @@
 package ru.hogwarts.school.model;
 
-public class Student {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 
+@Entity
+public class Student {
+    @Id
+    @GeneratedValue
     private Long id;
     private String name;
     private int age;
+    @ManyToOne
+    @JoinColumn(name="facultyId")
+    private Faculty faculty;
 
-    public Student(Long id, String name, int age) {
-        this.id = id;
+    public Student() {
+    }
+
+    public Student( String name, int age) {
         this.name = name;
         this.age = age;
     }
@@ -24,6 +34,10 @@ public class Student {
         return age;
     }
 
+    public Faculty getFaculty() {
+        return faculty;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -34,5 +48,9 @@ public class Student {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public void setFaculty(Faculty faculty) {
+        this.faculty = faculty;
     }
 }
