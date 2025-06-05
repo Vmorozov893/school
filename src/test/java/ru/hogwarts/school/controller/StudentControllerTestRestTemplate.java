@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -75,8 +72,9 @@ public class StudentControllerTestRestTemplate {
         assertEquals(actualStudent.getName(), student.getName());
         assertEquals(actualStudent.getAge(), student.getAge());
     }
+
     @Test
-    void shouldEditStudent(){
+    void shouldEditStudent() {
         Student student = new Student("Garry Potter", 11);
         student = repository.save(student);
 
@@ -101,22 +99,17 @@ public class StudentControllerTestRestTemplate {
     }
 
     @Test
-    void shouldDeleteStudent(){
+    void shouldDeleteStudent() {
+        Student student = new Student("Garry Potter", 11);
+        student = repository.save(student);
 
-    }
-
-    @Test
-    void shouldStudentsByAge(){
-
-    }
-
-    @Test
-    void shouldFindByAgeBetween() {
-
-    }
-    @Test
-    void shouldFacultyByStudent(){
-
+        ResponseEntity<Void> studentResponseEntity = restTemplate.exchange(
+                "http://localhost:" + port + "/student/" + student.getId(),
+                HttpMethod.DELETE,
+                null,
+                Void.class
+        );
+        assertEquals(HttpStatus.NO_CONTENT, studentResponseEntity.getStatusCode());
     }
 
 }
