@@ -7,10 +7,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.StudentRepository;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -47,7 +53,69 @@ public class StudentControllerTestRestTemplate {
         Student actualStudent = studentResponseEntity.getBody();
         assertNotNull(actualStudent.getId());
         assertEquals(actualStudent.getName(), student.getName());
-        assertEquals(actualStudent.getAge(),student.getAge());
+        assertEquals(actualStudent.getAge(), student.getAge());
+
+    }
+
+    @Test
+    void shouldGetStudentInfo() {
+        Student student = new Student("Garry Potter", 11);
+        student = repository.save(student);
+
+        ResponseEntity<Student> studentResponseEntity = restTemplate.getForEntity(
+                "http://localhost:" + port + "/student/" + student.getId(),
+                Student.class
+        );
+
+        assertNotNull(studentResponseEntity);
+        assertEquals(studentResponseEntity.getStatusCode(), HttpStatusCode.valueOf(200));
+
+        Student actualStudent = studentResponseEntity.getBody();
+        assertEquals(actualStudent.getId(), student.getId());
+        assertEquals(actualStudent.getName(), student.getName());
+        assertEquals(actualStudent.getAge(), student.getAge());
+    }
+    @Test
+    void shouldEditStudent(){
+        Student student = new Student("Garry Potter", 11);
+        student = repository.save(student);
+
+        Student newStudent = new Student("Ron Weasley", 13);
+
+        HttpEntity<Student> entity = new HttpEntity<>(newStudent);
+        ResponseEntity<Student> studentResponseEntity = restTemplate.exchange(
+                "http://localhost:" + port + "/student/" + student.getId(),
+                HttpMethod.PUT,
+                entity,
+                Student.class
+        );
+
+        assertNotNull(studentResponseEntity);
+        assertEquals(studentResponseEntity.getStatusCode(), HttpStatusCode.valueOf(200));
+
+        Student actualStudent = studentResponseEntity.getBody();
+        assertEquals(actualStudent.getId(), student.getId());
+        assertEquals(actualStudent.getName(), newStudent.getName());
+        assertEquals(actualStudent.getAge(), newStudent.getAge());
+
+    }
+
+    @Test
+    void shouldDeleteStudent(){
+
+    }
+
+    @Test
+    void shouldStudentsByAge(){
+
+    }
+
+    @Test
+    void shouldFindByAgeBetween() {
+
+    }
+    @Test
+    void shouldFacultyByStudent(){
 
     }
 
