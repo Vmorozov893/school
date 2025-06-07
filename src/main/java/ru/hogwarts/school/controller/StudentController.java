@@ -70,4 +70,20 @@ public class StudentController {
     public Faculty facultyByStudent(Long id){
         return studentService.facultyByStudent(id);
     }
+
+    @GetMapping("getStudentsCount")
+    public int getStudentsCount(){
+        return studentService.getStudentsCount();
+    }
+
+    @GetMapping("getAverageAgeStudents")
+    public int getAverageAgeStudents(){
+        return studentService.getAverageAgeStudents();
+    }
+
+    @GetMapping("getLastFiveStudents")
+    public List<Student> getLastFiveStudents(){
+        return studentService.getLastFiveStudents();
+    }
+
 }
