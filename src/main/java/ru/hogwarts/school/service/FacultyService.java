@@ -1,5 +1,7 @@
 package ru.hogwarts.school.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
@@ -13,19 +15,24 @@ public class FacultyService {
 
     private final FacultyRepository facultyRepository;
 
+    private static final Logger logger = LoggerFactory.getLogger(FacultyService.class);
+
     public FacultyService(FacultyRepository facultyRepository) {
         this.facultyRepository = facultyRepository;
     }
 
     public Faculty createFaculty(Faculty faculty){
+        logger.info("Was invoked method for create faculty");
         return facultyRepository.save(faculty);
     }
 
     public Faculty getFacultyById(Long id) {
+        logger.info("Was invoked method for get faculty by id");
         return facultyRepository.findById(id).orElse(null);
     }
 
     public Faculty editFaculty(Long id, Faculty faculty) {
+        logger.info("Was invoked method for edit faculty");
         Faculty faculty1 = facultyRepository.findById(id).orElseThrow(IllegalArgumentException::new);
         faculty1.setName(faculty.getName());
         faculty1.setColor(faculty.getColor());
@@ -33,17 +40,21 @@ public class FacultyService {
     }
 
     public void deleteFaculty(Long id) {
+        logger.info("Was invoked method for delete faculty");
         facultyRepository.deleteById(id);
     }
 
     public List<Faculty> filterForColor(String color){
+        logger.info("Was invoked method for filter faculty by color");
         return facultyRepository.findAll().stream().filter(e->e.getColor().equals(color)).collect(Collectors.toList());
     }
-    public List<Faculty> findByNameIgnoreCaseOrColorIgnoreCase(String name,String color){
+    public List<Faculty> findByNameOrColorIgnoreCase(String name, String color){
+        logger.info("Was invoked method for find by name or color ignore case");
         return facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color);
     }
 
     public List<Student> studentsByFaculty (Long id){
+        logger.info("Was invoked method for get students by faculty id");
         return facultyRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStudents();
     }
 

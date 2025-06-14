@@ -1,5 +1,7 @@
 package ru.hogwarts.school.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,8 +23,12 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 @Service
 public class AvatarService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AvatarService.class);
+
     private final AvatarRepository avatarRepository;
+
     private final StudentRepository studentRepository;
+
     @Value("${path.to.avatars.folder}")
     private String avatarsDir;
 
@@ -32,12 +38,14 @@ public class AvatarService {
     }
 
     public void uploadAvatar(Long studentId, MultipartFile avatarFile) throws IOException {
+        logger.info("Was invoked method for upload avatar");
         Student student = studentRepository.findById(studentId).orElseThrow();
         Path filePath = saveToDisc(studentId,avatarFile);
         saveToDB(student,filePath,avatarFile);
     }
 
     private Path saveToDisc(Long studentId,MultipartFile avatarFile) throws IOException {
+        logger.info("Was invoked method for save avatar to disc");
         Path filePath = Path.of(avatarsDir, "avatar" + studentId + "." + getExtensions(avatarFile.getOriginalFilename()));
         Files.createDirectories(filePath.getParent());
         Files.deleteIfExists(filePath);
@@ -53,6 +61,7 @@ public class AvatarService {
     }
 
     private void saveToDB(Student student, Path filePath, MultipartFile avatarFile) throws IOException {
+        logger.info("Was invoked method for save avatar to DataBase");
         Avatar avatar = findAvatar(student.getId());
         avatar.setStudent(student);
         avatar.setFilePath(filePath.toString());
@@ -63,14 +72,17 @@ public class AvatarService {
     }
 
     public Avatar findAvatar(Long studentId){
+        logger.info("Was invoked method for find avatar by student id");
         return avatarRepository.findByStudent_id(studentId).orElse(new Avatar());
     }
 
     private String getExtensions(String fileName) {
+        logger.info("Was invoked method for get extensions");
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
     public List<Avatar> getPaginatedAvatars(int pageNumber,int pageSize){
+        logger.info("Was invoked method for get paginated avatars");
         Pageable pageable = PageRequest.of(pageNumber-1,pageSize);
         Page<Avatar> avatarPage = avatarRepository.findAll(pageable);
         return avatarPage.getContent();
