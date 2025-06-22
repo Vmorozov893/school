@@ -57,7 +57,7 @@ public class FacultyController {
 
     @GetMapping("findByNameIgnoreCaseOrColorIgnoreCase")
     public ResponseEntity<List<Faculty>> findByNameIgnoreCaseOrColorIgnoreCase(String string){
-        List<Faculty> faculties = facultyService.findByNameIgnoreCaseOrColorIgnoreCase(string,string);
+        List<Faculty> faculties = facultyService.findByNameOrColorIgnoreCase(string,string);
         if(faculties == null){
             return ResponseEntity.notFound().build();
         }
