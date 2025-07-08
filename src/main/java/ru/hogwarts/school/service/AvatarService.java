@@ -1,5 +1,6 @@
 package ru.hogwarts.school.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
@@ -39,9 +41,18 @@ public class AvatarService {
 
     public void uploadAvatar(Long studentId, MultipartFile avatarFile) throws IOException {
         logger.info("Was invoked method for upload avatar");
-        Student student = studentRepository.findById(studentId).orElseThrow();
+        Student student = studentRepository.findById(studentId).orElseThrow(() -> {
+            logger.error("Student with ID: {} not found.", studentId);
+            return new EntityNotFoundException("Student not found");
+        });;
+        try {
         Path filePath = saveToDisc(studentId,avatarFile);
         saveToDB(student,filePath,avatarFile);
+            logger.info("Avatar uploaded successfully for student with ID: {}", studentId);
+        } catch (IOException e) {
+            logger.error("Error occurred while uploading avatar for student with ID: {}. Error: {}", studentId, e.getMessage());
+            throw e;
+        }
     }
 
     private Path saveToDisc(Long studentId,MultipartFile avatarFile) throws IOException {
@@ -56,7 +67,11 @@ public class AvatarService {
                 BufferedOutputStream bos = new BufferedOutputStream(os, 1024);
         ) {
             bis.transferTo(bos);
+        } catch (IOException e) {
+            logger.error("Error saving avatar: " + e.getMessage(), e);
+            throw e;
         }
+        logger.info("Avatar successfully saved: " + filePath);
         return filePath;
     }
 
@@ -68,12 +83,25 @@ public class AvatarService {
         avatar.setFileSize(avatarFile.getSize());
         avatar.setMediaType(avatarFile.getContentType());
         avatar.setData(avatarFile.getBytes());
-        avatarRepository.save(avatar);
+        try {
+            avatarRepository.save(avatar);
+            logger.info("Аватар успешно сохранен для студента с ID: " + student.getId());
+        } catch (Exception e) {
+            logger.error("Ошибка при сохранении аватара в базу данных: " + e.getMessage(), e);
+            throw e;
+        }
     }
 
     public Avatar findAvatar(Long studentId){
-        logger.info("Was invoked method for find avatar by student id");
-        return avatarRepository.findByStudent_id(studentId).orElse(new Avatar());
+        Optional<Avatar> avatarOptional = avatarRepository.findByStudent_id(studentId);
+
+        if (avatarOptional.isPresent()) {
+            logger.info("Avatar found for student ID: {}", studentId);
+            return avatarOptional.get();
+        } else {
+            logger.warn("Avatar not found for student ID: {}", studentId);
+            return new Avatar();
+        }
     }
 
     private String getExtensions(String fileName) {
