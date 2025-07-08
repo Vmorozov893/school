@@ -28,12 +28,18 @@ public class StudentService {
 
     public Student getStudentById(Long id) {
         logger.info("Was invoked method for get student by id");
-        return studentRepository.findById(id).orElse(null);
+        return studentRepository.findById(id).orElseThrow(()->{
+            logger.error("No student found with id: {}",id);
+            return new IllegalArgumentException("No student found with id:"+id);
+        });
     }
 
     public Student editStudent(Long id, Student student) {
         logger.info("Was invoked method for edit student");
-        Student student1 = studentRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+        Student student1 = studentRepository.findById(id).orElseThrow(()->{
+            logger.error("No student found with id: {}",id);
+            return new IllegalArgumentException("No student found with id:"+id);
+        });
         student1.setName(student.getName());
         student1.setAge(student.getAge());
         return studentRepository.save(student1);
@@ -56,7 +62,10 @@ public class StudentService {
 
     public Faculty facultyByStudent(Long id){
         logger.info("Was invoked method for get faculty by student id");
-        return studentRepository.findById(id).orElseThrow(IllegalArgumentException::new).getFaculty();
+        return studentRepository.findById(id).orElseThrow(()->{
+            logger.error("No student found with id: {}",id);
+            return new IllegalArgumentException("No student found with id:"+id);
+        }).getFaculty();
     }
 
     public int getStudentsCount(){
