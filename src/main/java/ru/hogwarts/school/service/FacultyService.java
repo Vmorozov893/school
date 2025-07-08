@@ -9,6 +9,7 @@ import ru.hogwarts.school.repository.FacultyRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class FacultyService {
@@ -21,19 +22,30 @@ public class FacultyService {
         this.facultyRepository = facultyRepository;
     }
 
-    public Faculty createFaculty(Faculty faculty){
+    public Faculty createFaculty(Faculty faculty) {
         logger.info("Was invoked method for create faculty");
         return facultyRepository.save(faculty);
     }
 
     public Faculty getFacultyById(Long id) {
         logger.info("Was invoked method for get faculty by id");
-        return facultyRepository.findById(id).orElse(null);
+        Optional<Faculty> faculty = facultyRepository.findById(id);
+
+        if (faculty.isEmpty()) {
+            logger.warn("No faculty found with id: {}", id);
+        } else {
+            logger.debug("Faculty found: {}", faculty.get());
+        }
+
+        return faculty.get();
     }
 
     public Faculty editFaculty(Long id, Faculty faculty) {
         logger.info("Was invoked method for edit faculty");
-        Faculty faculty1 = facultyRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+        Faculty faculty1 = facultyRepository.findById(id).orElseThrow(() -> {
+            logger.error("No faculty found with id: {}", id);
+            return new IllegalArgumentException("No faculty found with id: " + id);
+        });
         faculty1.setName(faculty.getName());
         faculty1.setColor(faculty.getColor());
         return facultyRepository.save(faculty1);
@@ -44,18 +56,22 @@ public class FacultyService {
         facultyRepository.deleteById(id);
     }
 
-    public List<Faculty> filterForColor(String color){
+    public List<Faculty> filterForColor(String color) {
         logger.info("Was invoked method for filter faculty by color");
-        return facultyRepository.findAll().stream().filter(e->e.getColor().equals(color)).collect(Collectors.toList());
+        return facultyRepository.findAll().stream().filter(e -> e.getColor().equals(color)).collect(Collectors.toList());
     }
-    public List<Faculty> findByNameOrColorIgnoreCase(String name, String color){
+
+    public List<Faculty> findByNameOrColorIgnoreCase(String name, String color) {
         logger.info("Was invoked method for find by name or color ignore case");
         return facultyRepository.findByNameIgnoreCaseOrColorIgnoreCase(name, color);
     }
 
-    public List<Student> studentsByFaculty (Long id){
+    public List<Student> studentsByFaculty(Long id) {
         logger.info("Was invoked method for get students by faculty id");
-        return facultyRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStudents();
+        return facultyRepository.findById(id).orElseThrow(() -> {
+            logger.error("No faculty found with id: {}", id);
+            return new IllegalArgumentException("No faculty found with id: " + id);
+        }).getStudents();
     }
 
 
